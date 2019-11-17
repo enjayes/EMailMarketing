@@ -317,7 +317,7 @@ export class ProductListComponent implements OnInit {
   filterText: string = ""
   statistics:any = {}
 
-  host: string = "http://192.168.178.91:4201"
+  host: string = "http://192.168.178.44:4201"//"http://192.168.178.91:4201"
   url: string = this.host + "/publishers/get" //192.168.178.91:4201
   mailurl: string = this.host + "/publishers/send" //192.168.178.91:4201
   updateurl: string = this.host + "/publishers/update" //192.168.178.91:4201

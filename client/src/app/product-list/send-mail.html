@@ -1,0 +1,62 @@
+<h2 mat-dialog-title style="font-size:18px"> {{publisher.RegistrantName+ "  -  E-Mail"}}</h2>
+<mat-dialog-content class="mat-typography" style="min-width:650px;">
+
+      
+    <mat-card style="padding:8px;margin-bottom:8px;">
+        <div style="height:20px;">
+            <span style="float:left;color:grey;margin-right:10px;height:25px;">Address: </span><span
+                style="float:left;height:25px;width:calc(100% - 70px)"> <input matInput  style="height:20px;overflow:hidden"
+                    type="text" matInput   [(ngModel)]="data.mailaddress"   /></span>
+        </div>
+        
+    </mat-card>
+
+    <mat-card style="padding:8px;margin-bottom:15px;">
+
+        <div style="height:20px;">
+            <span style="float:left;color:grey;margin-right:10px;height:25px;">Subject: </span> <span
+                style="float:left;height:25px;width:calc(100% - 70px)"><input matInput  style="height:20px;overflow:hidden"
+                    type="text" matInput [(ngModel)]="data.mailsubject"  /></span>
+        </div>
+
+    </mat-card>
+ 
+
+
+    <mat-card >
+        <textarea  matInput [(ngModel)]="data.mailtext" style="min-height:280px;"></textarea>
+
+
+
+    </mat-card>
+    <br />
+    
+    <mat-menu #optionsMenu="matMenu">
+            <button *ngIf="agencies.length>0" mat-menu-item [matMenuTriggerFor]="adressMenu">Select Mail Address</button>
+            <button *ngIf="publisher.books.length>0 && publisher.books.length < 1000" mat-menu-item [matMenuTriggerFor]="bookMenu">Select Book</button>
+            <button *ngIf="templateCount>0" mat-menu-item [matMenuTriggerFor]="templateMenu">Select Template</button>
+          </mat-menu>
+          <mat-menu #bookMenu="matMenu">
+                <button (click)="selectBook(book)" *ngFor="let book of publisher.books" mat-menu-item>{{book.title}}</button>
+
+        </mat-menu>
+
+          <mat-menu #adressMenu="matMenu">
+            <button (click)="selectAddress(agency.mail)"   *ngFor="let agency of agencies" mat-menu-item title= "{{agency.name}}">{{agency.mail}}</button> 
+        </mat-menu>
+
+
+        <mat-menu #templateMenu="matMenu">
+            <button (click)="selectTemplate(i)"   *ngFor="let index of templateCountRange; let i = index " mat-menu-item >{{"Template "+(i+1)}}</button> 
+        </mat-menu>
+    
+
+
+
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button *ngIf="(templateCount>0 || agencies.length>0 || (publisher.books.length>0 && publisher.books.length < 1000))" style="margin-right:30px" mat-button [matMenuTriggerFor]="optionsMenu">Options</button>
+    <button mat-button [mat-dialog-close]="{action:'close'}" mat-dialog-close >Cancel</button>
+    <button mat-button [mat-dialog-close]="{action:'save',data:data}"  mat-dialog-close>Save</button>
+    <button mat-button [mat-dialog-close]="{action:'send',data:data}"   mat-dialog-close>Send</button>
+</mat-dialog-actions>

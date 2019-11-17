@@ -1,0 +1,225 @@
+
+<div class="openstatistics">
+    <button mat-mini-fab color =  "" style="margin-top: 10px;margin-left: 70px;" mat-raised-button (click)="openStatistics();"><fa name="info" size="lg"></fa></button>
+</div>
+
+<div class="filterlistcontainer">
+
+    <mat-form-field style="padding-left: 15px;" title="Publishers">
+
+        <mat-select [(value)]="selectedState" (selectionChange)="selectedPublisherState(true)">
+            <mat-option *ngFor="let state of publisherStates" [value]="state.value">
+                {{state.viewValue}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+    <button style="margin-top: 10px;margin-left: 70px;" mat-raised-button (click)="openMailTemplate();">Mail Template
+    </button>
+
+
+    <mat-form-field style="padding-left:15px;display:block;margin-top:-11px;" class="filter-full-width">
+        <input matInput placeholder="Filter" [(ngModel)]="filterText" (ngModelChange)="filterChanged()">
+    </mat-form-field>
+
+
+
+</div>
+<div class="listcontainer">
+    <mat-action-list #publishers>
+        <virtual-scroller class="listscroller" #scrollPublishers [items]="selectedPublisherList">
+            <mat-list-item [ngClass]="{selectedlistitem: selectedPublisher._id === publisher._id,listitem:true}"
+                *ngFor="let publisher of scrollPublishers.viewPortItems" (click)="onListClicked(publisher)">
+                <div class="listitemtext">{{publisher.RegistrantName}}</div>
+                <div style="font-size: 14px;color:rgba(0, 0, 0, 0.5)!important">
+                    {{(publisher.books.length==1)?"1 Book":publisher.books.length+" Books (SR: "+(publisher.sales_rank>0?publisher.sales_rank:"-")+")"}}
+
+                </div>
+
+            </mat-list-item>
+        </virtual-scroller>
+
+    </mat-action-list>
+</div>
+<div id="publisherDetailsContainer" class="detailscontainer" *ngIf="selectedPublisher.RegistrantName" (scroll)="onScroll($event)">
+
+    <mat-card>
+        <h1 style="margin-left: 24px;font-size:20px;cursor:pointer;margin-right:100px"
+            (click)="onSearchPublisherClicked()">
+            {{selectedPublisher.RegistrantName?selectedPublisher.RegistrantName:""}}</h1>
+
+        <div style="clear:both;"></div>
+        <span style="margin-left: 24px;cursor:pointer;" (click)="onSearchPublisherLocationClicked()"
+            class="publisherAddress">{{selectedPublisherAddress}}</span>
+        <br />
+        <br />
+
+        <button *ngIf="!selectedPublisher.saved" (click)="savePublisher(false,undefined);" mat-mini-fab color=""
+            style="position: absolute;right: 21px;top: 15px;">
+            <fa name="save" size="lg" style="margin-top:-1px;"></fa>
+        </button>
+        <button *ngIf="selectedPublisher.saved" (click)="removePublisher();" mat-mini-fab color=""
+            style="position: absolute;right: 21px;top: 15px;">
+            <fa name="trash" size="lg" style="margin-top:-1px;"></fa>
+        </button>
+
+        <mat-divider></mat-divider>
+        <br />
+        <br />
+        <div class="publisherDetails">
+            <div style="overflow:auto">
+                <span style="float:left;margin-right:50px;min-width: 50px;">
+                    <a title="{{agency.website?agency.website:''}}" style="display:block;height:23px;"
+                        *ngFor="let agency of selectedPublisherAgencies"
+                        href="{{agency.website?agency.website:'https://www.google.de/search?q='+selectedPublisher.RegistrantName}}"
+                        target="_blank" rel="noopener noreferrer">
+                        <mat-icon matSuffix>homepage</mat-icon>
+                        <span style="vertical-align: middle;line-height: 15px;">{{agency.name?agency.name:"-"}}</span>
+                    </a>
+                </span>
+
+                <span style="float:left;margin-right:50px;min-width: 50px;">
+                    <a style="display:block;height:23px;cursor: pointer;"
+                        *ngFor="let agency of selectedPublisherAgencies"
+                        (click)="openDialogTimeout(undefined,agency.mail);" href="#">
+                        <mat-icon matSuffix>email</mat-icon>
+                        <span style="vertical-align: middle;line-height: 15px;"> {{agency.mail?agency.mail:"-"}}</span>
+
+                    </a>
+                </span>
+                <!--span style="float:left;margin-right:50px;min-width: 100px;">
+                <div style="height:23px;" *ngFor="let agency of selectedPublisherAgencies">
+                   
+                    <mat-icon matSuffix>phone</mat-icon>
+                    <span style="vertical-align: middle;line-height: 15px;"> {{agency.phone?agency.phone:"-"}} </span>
+                   
+                </div>
+            </span> !-->
+                <span style="float:left;margin-right:50px;min-width: 50px;">
+                    <a style="display:block;height:23px;cursor: pointer;"
+                        *ngFor="let agency of selectedPublisherAgencies"
+                        (click)="openPerson(agency); event.preventDefault();" href="#">
+                        <mat-icon matSuffix>person</mat-icon>
+                        <span style="vertical-align: middle;line-height: 15px;">
+                            {{agency.contact?agency.contact:"-"}}</span>
+
+                    </a>
+                </span>
+                <span>
+
+                    <span style="display:block;height:23px;" *ngFor="let agency of selectedPublisherAgencies">
+                        <a href="#" (click)="searchAgency(agency,'LinkedIn'); event.preventDefault();">
+                            <fa name="linkedin" style="margin-right:10px;"></fa>
+                        </a>
+                        <a href="#" (click)="searchAgency(agency,'Xing'); event.preventDefault();">
+                            <fa name="xing" style="margin-right:10px;"></fa>
+                        </a>
+                        <a href="#" (click)="searchAgency(agency,'Facebook'); event.preventDefault();">
+                            <fa name="facebook" style="margin-right:10px;"></fa>
+                        </a>
+                        <a href="#" (click)="searchAgency(agency,''); event.preventDefault();">
+                            <fa name="google" style="margin-right:10px;"></fa>
+                        </a>
+
+                    </span>
+
+
+                </span>
+
+
+            </div>
+        </div>
+        <br />
+        <mat-divider style="margin-top: -3px;"></mat-divider>
+        <div *ngIf="selectedPublisher.mails&&selectedPublisher.mails.length>0">
+            <div style="margin-left:25px">
+                <br />
+                <br />
+                <span style="display:block;height:23px;cursor: pointer;"
+                    *ngFor="let mail of selectedPublisher.mails; let i = index">
+
+                    <mat-icon *ngIf="!mail.sent" style="float:left" matSuffix>drafts</mat-icon>
+                    <mat-icon *ngIf="mail.sent" style="float:left" matSuffix>email</mat-icon>
+                    <div
+                        style="vertical-align: middle;line-height: 15px; white-space: nowrap; text-overflow: ellipsis;overflow: hidden;">
+
+                        <a (click)="openMailTimeout(mail,i);"
+                            style="display:block;float:left;width:calc(100% - 50px); white-space: nowrap; text-overflow: ellipsis;overflow: hidden;">
+                            {{mail.mailsubject}}
+                        </a>
+
+                        <fa (click)="deleteMail(mail,i);" name="trash" size="lg"
+                            style="margin-left:20px;margin-top:-1px;"></fa>
+                    </div>
+                </span>
+            </div>
+            <br />
+            <br />
+
+            <mat-divider style="margin-top: -3px;"></mat-divider>
+        </div>
+        <!--
+        <button style="margin-right:30px;" mat-button (click)="openDialog()">Mail</button>
+        <button mat-button (click)="onSearchPublisherClicked()">Search Publisher</button>
+        <br />
+        <br />
+        <br />
+        -->
+
+
+        <button style="float:right" *ngIf="!accordionState" mat-flat-button (click)="openAccordion(true);">Expand
+        </button>
+        <button style="float:right" *ngIf="accordionState" mat-flat-button (click)="openAccordion(false);">Collapse
+        </button>
+        <div style="clear: both;"></div>
+        <mat-accordion #accordion="matAccordion" [multi]="true">
+            <mat-expansion-panel *ngFor="let book of selectedPublisher.visibleBooks">
+                <mat-expansion-panel-header>
+                    <!-- style="background-color:red" -->
+                    <mat-panel-title title="{{book.title}}">
+                        {{"🡆   "+createShortTitle(book.title)+"  (SR: "+(book.sales_rank>0?book.sales_rank:"-")+")"}}
+                    </mat-panel-title>
+                    <mat-panel-description>
+
+                    </mat-panel-description>
+                </mat-expansion-panel-header>
+                <div>
+
+                    <button mat-raised-button style="margin-right:30px;"
+                        (click)="openDialogTimeout(book,undefined,$event);">Mail</button>
+                    <button mat-raised-button (click)="onBookClicked(book)">Open Amazon</button>
+                    <span class="bookrating">{{book.rating!="Zurück"?book.rating:""}}</span>
+                    <br>
+                    <br>
+
+                    <h1>{{book.title}}</h1>
+                </div>
+                <br />
+
+
+                <a href="{{book.url}}" target="_blank" rel="noopener noreferrer">
+                    <img src="{{book.image}}" style="float:left;margin-right:10px;margin-bottom:10px;height:300px;" />
+                </a>
+                {{book.description}}
+                <br />
+                <div *ngFor="let author of book.authors">
+                    {{author}}
+                </div>
+
+
+
+
+
+            </mat-expansion-panel>
+
+        </mat-accordion>
+        <br/>
+     
+
+
+
+    </mat-card>
+    <br />
+    <br />
+    <br />
+
+</div>

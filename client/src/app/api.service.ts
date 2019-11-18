@@ -99,6 +99,12 @@ export class ApiService {
         catchError(this.handleError)
       );
     }
+    else if(action=="publishercolor"){
+      return this.http.post(url+"/"+action+"/"+dataObject._id,{color:dataObject.color}, httpOptions).pipe(
+        map(this.extractData),
+        catchError(this.handleError)
+      );
+    }
     else{
   
       return this.http.get(url+"/"+action+"/"+dataObject._id, httpOptions).pipe(

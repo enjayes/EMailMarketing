@@ -9,6 +9,7 @@ import { products } from '../products';
 
 
 import { ApiService } from "../api.service";
+import { isDevMode } from '@angular/core';
 
 
 function createShortBookTitle(subject) {
@@ -166,6 +167,8 @@ export class SendMailDialog {
 
 
   ngOnInit() {
+    
+  
     this.agencies = []
     this.publisher = this.data.publisher
     this.templateIndex = 0
@@ -316,6 +319,7 @@ export class ProductListComponent implements OnInit {
   template: string = ""
   filterText: string = ""
   statistics:any = {}
+  publisherColors:any = ["white","green","red","orange","yellow"]
 
   host: string = "http://192.168.178.44:4201"//"http://192.168.178.91:4201"
   url: string = this.host + "/publishers/get" //192.168.178.91:4201
@@ -857,6 +861,23 @@ export class ProductListComponent implements OnInit {
 
   }
 
+  changePublisherColor(){
+    if(!this.selectedPublisher.color){
+      this.selectedPublisher.color = 1;
+    }
+    else{
+      this.selectedPublisher.color++
+    }
+    if(this.selectedPublisher.color>=this.publisherColors.length){
+      this.selectedPublisher.color = 0
+    }
+    this.api.update(this.updateurl, "publishercolor", this.selectedPublisher).subscribe(
+      data => { },
+      err => { }
+    )
+
+  }
+
 
   onScroll(){
     if(this.selectedPublisher.books.length!=this.selectedPublisher.visibleBooks.length){
@@ -869,7 +890,12 @@ export class ProductListComponent implements OnInit {
   }
 
   ngOnInit() {
-
+    if(isDevMode()){
+      this.host = "http://192.168.178.91:4201"
+      this.url = this.host + "/publishers/get" //192.168.178.91:4201
+      this.mailurl = this.host + "/publishers/send" //192.168.178.91:4201
+      this.updateurl = this.host + "/publishers/update" //192.168.178.91:4201
+    }
     this.api
       .getTemplate(this.url)
       .subscribe(

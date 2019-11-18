@@ -1,4 +1,9 @@
 
+
+
+<span *ngIf="publisherList.length>0">
+
+
 <div class="openstatistics">
     <button mat-mini-fab color =  "" style="margin-top: 10px;margin-left: 70px;" mat-raised-button (click)="openStatistics();"><fa name="info" size="lg"></fa></button>
 </div>
@@ -29,12 +34,13 @@
         <virtual-scroller class="listscroller" #scrollPublishers [items]="selectedPublisherList">
             <mat-list-item [ngClass]="{selectedlistitem: selectedPublisher._id === publisher._id,listitem:true}"
                 *ngFor="let publisher of scrollPublishers.viewPortItems" (click)="onListClicked(publisher)">
-                <div class="listitemtext">{{publisher.RegistrantName}}</div>
-                <div style="font-size: 14px;color:rgba(0, 0, 0, 0.5)!important">
+                <div [ngStyle]="{'opacity':0.2,'margin-left': '-15px','margin-right': '-15px','padding-left': '15px','padding-right': '15px','height': '80px','background-color': publisher.color?(publisherColors[publisher.color]):('transparent')}" >
+                </div>
+                <div style="margin-top:-80px" class="listitemtext">{{publisher.RegistrantName}}</div>
+                <div style="margin-top:-80px;font-size: 14px;color:rgba(0, 0, 0, 0.5)!important">
                     {{(publisher.books.length==1)?"1 Book":publisher.books.length+" Books (SR: "+(publisher.sales_rank>0?publisher.sales_rank:"-")+")"}}
 
                 </div>
-
             </mat-list-item>
         </virtual-scroller>
 
@@ -53,6 +59,11 @@
         <br />
         <br />
 
+        <button [ngStyle]="{'background-color': publisherColors[selectedPublisher.color]}" style="position: absolute;right: 80px;top: 15px;"   (click)="changePublisherColor()" mat-mini-fab color="">
+          
+            <mat-icon aria-hidden="false" style="margin-top: -10px;margin-left: -1px;font-size: 25px;" aria-label="Color">color_lens</mat-icon>
+        </button>
+
         <button *ngIf="!selectedPublisher.saved" (click)="savePublisher(false,undefined);" mat-mini-fab color=""
             style="position: absolute;right: 21px;top: 15px;">
             <fa name="save" size="lg" style="margin-top:-1px;"></fa>
@@ -61,6 +72,14 @@
             style="position: absolute;right: 21px;top: 15px;">
             <fa name="trash" size="lg" style="margin-top:-1px;"></fa>
         </button>
+
+    
+
+        <!--div  style="position: absolute;right: 80px;top: 15px;">
+        <button  [ngStyle]="{'background-color':color,'margin-right':'5px'}" *ngFor="let color of publisherColors" (click)="setPublisherColor(color);" mat-mini-fab color="">
+            <fa name="save" size="lg" style="margin-top:-1px;"></fa>
+        </button>
+        </div> -->
 
         <mat-divider></mat-divider>
         <br />
@@ -223,3 +242,13 @@
     <br />
 
 </div>
+</span>
+<span *ngIf="publisherList.length==0" style="position:fixed;left:0px;top:51px;bottom:0px;right:0px"> 
+
+    <mat-progress-bar mode="indeterminate"> </mat-progress-bar> 
+
+
+    <!--div style="margin: 0 0;position: absolute;left:50%;top: 50%;-ms-transform: translate(-50%,-50%);transform: translate(-50%,-50%);width:100px;height:100px;">
+    <mat-spinner style="width:50px;height:50px" mode="indeterminate"></mat-spinner>
+    </div-->
+</span>

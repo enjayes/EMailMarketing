@@ -26,10 +26,13 @@ import { FormsModule } from '@angular/forms';
 import {MatMenuModule} from '@angular/material/menu';
 import { MatSnackBarModule } from "@angular/material";
 import { VirtualScrollerModule } from 'ngx-virtual-scroller';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatProgressBarModule} from '@angular/material/progress-bar';
 
 @NgModule({
   imports: [
     VirtualScrollerModule,
+    MatProgressBarModule,
     MatSnackBarModule,
     MatMenuModule,
     FormsModule,
@@ -50,6 +53,7 @@ import { VirtualScrollerModule } from 'ngx-virtual-scroller';
     ReactiveFormsModule,
     MatButtonToggleModule,
     MatCardModule,
+    MatProgressSpinnerModule,
     RouterModule.forRoot([
       { path: '', component: ProductListComponent },
     ])

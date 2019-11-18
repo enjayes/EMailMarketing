@@ -135,6 +135,7 @@ MongoClient.connect(url)
             
             console.log(action)
             console.log(req.body)
+
             if(action=="template"){
                 publishersCollection.update({ "_id": "template" }, {"_id":"template","template":req.body.template},{ upsert: true })
             }else{
@@ -144,6 +145,11 @@ MongoClient.connect(url)
                             console.log("found")
                             if(action=="mails"){
                                 doc.mails = req.body
+                            }
+                            else if(action=="publishercolor"){
+                                doc.color = req.body.color
+                                console.log("doc.color == "+req.body.color)
+
                             }
                         
                             console.log("insert: "+ req.params.id)

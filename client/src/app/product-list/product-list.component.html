@@ -34,13 +34,14 @@
         <virtual-scroller class="listscroller" #scrollPublishers [items]="selectedPublisherList">
             <mat-list-item [ngClass]="{selectedlistitem: selectedPublisher._id === publisher._id,listitem:true}"
                 *ngFor="let publisher of scrollPublishers.viewPortItems" (click)="onListClicked(publisher)">
-                <div [ngStyle]="{'opacity':0.2,'margin-left': '-15px','margin-right': '-15px','padding-left': '15px','padding-right': '15px','height': '80px','background-color': publisher.color?(publisherColors[publisher.color]):('transparent')}" >
-                </div>
-                <div style="margin-top:-80px" class="listitemtext">{{publisher.RegistrantName}}</div>
-                <div style="margin-top:-80px;font-size: 14px;color:rgba(0, 0, 0, 0.5)!important">
+                <div [ngStyle]="{'margin-left': '-15px','margin-right': '-15px','padding-left': '15px','padding-right': '15px','height': '80px','background-color': publisher.color?(publisherColorsOpacity[publisher.color]):('transparent')}" >
+              
+                <div class="listitemtext">{{publisher.RegistrantName}}</div>
+                <div style="font-size: 14px;color:rgba(0, 0, 0, 0.5)!important">
                     {{(publisher.books.length==1)?"1 Book":publisher.books.length+" Books (SR: "+(publisher.sales_rank>0?publisher.sales_rank:"-")+")"}}
 
                 </div>
+            </div>
             </mat-list-item>
         </virtual-scroller>
 
@@ -58,6 +59,9 @@
             class="publisherAddress">{{selectedPublisherAddress}}</span>
         <br />
         <br />
+        <button style="position: absolute;right: 140px;top: 15px;"   (click)="openDialogTimeout(undefined,undefined,$event,true);" mat-mini-fab color="">
+                <mat-icon aria-hidden="false" style="margin-top: -10px;margin-left: -1px;font-size: 25px;" aria-label="Color">note</mat-icon>
+            </button>
 
         <button [ngStyle]="{'background-color': publisherColors[selectedPublisher.color]}" style="position: absolute;right: 80px;top: 15px;"   (click)="changePublisherColor()" mat-mini-fab color="">
           
@@ -65,7 +69,7 @@
         </button>
 
         <button *ngIf="!selectedPublisher.saved" (click)="savePublisher(false,undefined);" mat-mini-fab color=""
-            style="position: absolute;right: 21px;top: 15px;">
+            style="position: absolute;right: 20px;top: 15px;">
             <fa name="save" size="lg" style="margin-top:-1px;"></fa>
         </button>
         <button *ngIf="selectedPublisher.saved" (click)="removePublisher();" mat-mini-fab color=""
@@ -99,7 +103,7 @@
                 <span style="float:left;margin-right:50px;min-width: 50px;">
                     <a style="display:block;height:23px;cursor: pointer;"
                         *ngFor="let agency of selectedPublisherAgencies"
-                        (click)="openDialogTimeout(undefined,agency.mail);" href="#">
+                        (click)="openDialogTimeout(undefined,agency.mail,$event,false);" href="#">
                         <mat-icon matSuffix>email</mat-icon>
                         <span style="vertical-align: middle;line-height: 15px;"> {{agency.mail?agency.mail:"-"}}</span>
 
@@ -150,29 +154,45 @@
         <br />
         <mat-divider style="margin-top: -3px;"></mat-divider>
         <div *ngIf="selectedPublisher.mails&&selectedPublisher.mails.length>0">
-            <div style="margin-left:25px">
+            <div style="margin-left:25px;margin-top:-10px;">
                 <br />
                 <br />
-                <span style="display:block;height:23px;cursor: pointer;"
+                <div 
                     *ngFor="let mail of selectedPublisher.mails; let i = index">
+                    <span *ngIf="!mail.note" style="display:block;height:23px;cursor: pointer;">
 
-                    <mat-icon *ngIf="!mail.sent" style="float:left" matSuffix>drafts</mat-icon>
-                    <mat-icon *ngIf="mail.sent" style="float:left" matSuffix>email</mat-icon>
-                    <div
-                        style="vertical-align: middle;line-height: 15px; white-space: nowrap; text-overflow: ellipsis;overflow: hidden;">
+                        <mat-icon *ngIf="!mail.sent" style="float:left" matSuffix>drafts</mat-icon>
+                        <mat-icon *ngIf="mail.sent" style="float:left" matSuffix>email</mat-icon>
+                        <div
+                            style="vertical-align: middle;line-height: 15px; white-space: nowrap; text-overflow: ellipsis;overflow: hidden;">
 
-                        <a (click)="openMailTimeout(mail,i);"
-                            style="display:block;float:left;width:calc(100% - 50px); white-space: nowrap; text-overflow: ellipsis;overflow: hidden;">
-                            {{mail.mailsubject}}
-                        </a>
+                            <a (click)="openMailTimeout(mail,i);"
+                                style="display:block;float:left;width:calc(100% - 50px); white-space: nowrap; text-overflow: ellipsis;overflow: hidden;">
+                                {{mail.mailsubject}}
+                            </a>
 
-                        <fa (click)="deleteMail(mail,i);" name="trash" size="lg"
-                            style="margin-left:20px;margin-top:-1px;"></fa>
-                    </div>
-                </span>
+                            <fa (click)="deleteMail(mail,i);" name="trash" size="lg"
+                                style="margin-left:20px;margin-top:-1px;"></fa>
+                        </div>
+                    </span>
+                    <span *ngIf="mail.note" style="display:block;height:23px;cursor: pointer;">
+                            <mat-icon  style="float:left" matSuffix>note</mat-icon>
+                            <div
+                                style="vertical-align: middle;line-height: 15px; white-space: nowrap; text-overflow: ellipsis;overflow: hidden;">
+    
+                                <a (click)="openMailTimeout(mail,i);"
+                                    style="display:block;float:left;width:calc(100% - 50px); white-space: nowrap; text-overflow: ellipsis;overflow: hidden;">
+                                    {{(mail.booktitle?(mail.booktitle):"")+((mail.booktitle&&mail.mailtext)?" - ":"")+mail.mailtext+((!mail.booktitle&&!mail.mailtext)?" - ":"")}}
+                                </a>
+    
+                                <fa (click)="deleteMail(mail,i);" name="trash" size="lg"
+                                    style="margin-left:20px;margin-top:-1px;"></fa>
+                            </div>
+                        </span>
+                </div>
             </div>
             <br />
-            <br />
+
 
             <mat-divider style="margin-top: -3px;"></mat-divider>
         </div>
@@ -192,7 +212,7 @@
         <div style="clear: both;"></div>
         <mat-accordion #accordion="matAccordion" [multi]="true">
             <mat-expansion-panel *ngFor="let book of selectedPublisher.visibleBooks">
-                <mat-expansion-panel-header>
+                <mat-expansion-panel-header [ngStyle]="{'background-color': publisherColorsOpacity[book.color]}">
                     <!-- style="background-color:red" -->
                     <mat-panel-title title="{{book.title}}">
                         {{"🡆   "+createShortTitle(book.title)+"  (SR: "+(book.sales_rank>0?book.sales_rank:"-")+")"}}
@@ -201,12 +221,20 @@
 
                     </mat-panel-description>
                 </mat-expansion-panel-header>
-                <div>
+                <div style="margin-top:10px;">
 
                     <button mat-raised-button style="margin-right:30px;"
-                        (click)="openDialogTimeout(book,undefined,$event);">Mail</button>
+                        (click)="openDialogTimeout(book,undefined,$event,false);">Mail</button>
                     <button mat-raised-button (click)="onBookClicked(book)">Open Amazon</button>
                     <span class="bookrating">{{book.rating!="Zurück"?book.rating:""}}</span>
+                    <button [ngStyle]="{'background-color': publisherColors[book.color]}" style="float:right"  (click)="changeBookColor(book)" mat-mini-fab color="">
+                        <mat-icon aria-hidden="false" style="margin-top: -10px;margin-left: -1px;font-size: 25px;" aria-label="Color">color_lens</mat-icon>
+                    </button>
+                    <button style="float:right;margin-right:10px"   (click)="openDialogTimeout(book,undefined,$event,true);" mat-mini-fab color="">
+                        <mat-icon aria-hidden="false" style="margin-top: -10px;margin-left: -1px;font-size: 25px;" aria-label="Color">note</mat-icon>
+                    </button>
+                    
+            
                     <br>
                     <br>
 

@@ -63,6 +63,7 @@ export class SendMailDialog {
   templateIndex: any = 0
   templateCount: number = 1
   templateCountRange: Array<number> = []
+  booktitle:string = ""
   constructor(
     public dialogRef: MatDialogRef<SendMailDialog>,
     @Inject(MAT_DIALOG_DATA) public data: any) { }
@@ -186,7 +187,7 @@ export class SendMailDialog {
       }
     }
 
-
+    
     var isbn = ""
     var shortbooktitle = ""
     if (this.data.book) {
@@ -230,6 +231,8 @@ export class SendMailDialog {
       this.updateTemplate(shortbooktitle, isbn)
 
     }
+
+    this.booktitle = this.data.booktitle
 
   }
 
@@ -320,6 +323,7 @@ export class ProductListComponent implements OnInit {
   filterText: string = ""
   statistics:any = {}
   publisherColors:any = ["white","green","red","orange","yellow"]
+  publisherColorsOpacity:any = ["rgba(255, 255, 255, 0.2)","rgba(0, 255, 0, 0.2)","rgba(255, 0, 0, 0.2)","rgba(255, 165, 0, 0.2)","rgba(255, 255, 0, 0.2)"]
 
   host: string = "http://192.168.178.44:4201"//"http://192.168.178.91:4201"
   url: string = this.host + "/publishers/get" //192.168.178.91:4201
@@ -418,6 +422,7 @@ export class ProductListComponent implements OnInit {
     mail.sent = data.sent
     mail.update = data.update
     mail.index = data.index
+    mail.note  = data.note
     return mail
   }
 
@@ -434,7 +439,7 @@ export class ProductListComponent implements OnInit {
 
   openMail(mail, index) {
     const dialogRef = this.dialog.open(SendMailDialog, {
-      width: "900px", data: { publisher: this.selectedPublisher, mail: mail.mailaddress, booktitle: mail.booktitle, mailsubject: mail.mailsubject, mailtext: mail.mailtext, update: true, index: index, template: this.template }
+      width: "900px", data: { publisher: this.selectedPublisher,note:mail.note, mail: mail.mailaddress, booktitle: mail.booktitle, mailsubject: mail.mailsubject, mailtext: mail.mailtext, update: true, index: index, template: this.template }
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -453,7 +458,7 @@ export class ProductListComponent implements OnInit {
   }
 
 
-  openDialogTimeout(book, mail, event) {
+  openDialogTimeout(book, mail, event,note) {
 
 
     if (event) {
@@ -462,24 +467,24 @@ export class ProductListComponent implements OnInit {
     }
     setTimeout(() => {
 
-      this.openDialog(book, mail)
+      this.openDialog(book, mail,note)
 
     }, 100);
   }
 
 
 
-  openDialog(book, mail) {
+  openDialog(book, mail,note) {
 
     const dialogRef = this.dialog.open(SendMailDialog, {
-      width: "900px", data: { publisher: this.selectedPublisher, book: book, mail: mail, template: this.template }
+      width: "900px", data: { publisher: this.selectedPublisher, book: book, mail: mail, template: this.template,note:note }
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result.action == "save") {
         var mail = this.cleanMail(result.data)
         this.savePublisher(false, mail)
-      } else if (result.action == "send") {
+      } else if (result.action == "send" && !note) {
         result.data.sent = true
         var mail = this.cleanMail(result.data)
         this.sendMail(mail)
@@ -614,6 +619,19 @@ export class ProductListComponent implements OnInit {
     )
   }
 
+
+  sortMails(a, b) {
+    if(a.note  && !b.note){
+      return -1
+    }
+    else if(!a.note && b.note){
+      return 1
+    }
+    else{
+      return 0
+    }
+  }
+
   savePublisher(send: boolean, mail: any) {
 
     if (send) {
@@ -623,10 +641,12 @@ export class ProductListComponent implements OnInit {
       )
     }
     else {
-      this.api.update(this.updateurl, "save", this.selectedPublisher).subscribe(
-        data => { },
-        err => { }
-      )
+      if(!mail){
+        this.api.update(this.updateurl, "save", this.selectedPublisher).subscribe(
+          data => { },
+          err => { }
+        )
+      }
     }
 
 
@@ -643,6 +663,10 @@ export class ProductListComponent implements OnInit {
       else {
         this.selectedPublisher.mails.push(mail)
       }
+
+      this.selectedPublisher.mails.sort(this.sortMails)
+
+
       this.api.update(this.updateurl, "mails", this.selectedPublisher).subscribe(
         data => { },
         err => { }
@@ -655,39 +679,39 @@ export class ProductListComponent implements OnInit {
       this.selectedPublisher.sent = true
       this.selectedPublisherSaved["sent"] = this.selectedPublisher
     }
-    else {
+    else if(!mail){
       this.selectedPublisher.saved = true
       this.selectedPublisherSaved["saved"] = this.selectedPublisher
     }
 
 
+    if (send ||  !mail) {
 
+      this.selectedPublisherState(false)
 
-    this.selectedPublisherState(false)
-
-    if (this.selectedState == "found" || (this.selectedState == "saved" && (!this.selectedPublisher.saved || this.selectedPublisher.sent)) || (this.selectedState == "sent" && !this.selectedPublisher.sent)) {
-      if (this.selectedPublisherList.length > 0) {
-        var newPublisher = this.selectedPublisherList[0]
-        var publisherFound = false;
-        for (var i = 0; i < this.publisherList.length; i++) {
-          if ((!this.publisherList[i].saved && this.selectedState == "found") || (!this.publisherList[i].saved && !this.publisherList[i].sent && this.selectedState == "sent")) {
-            newPublisher = this.publisherList[i]
-            if (publisherFound == true) {
-              break;
+      if (this.selectedState == "found" || (this.selectedState == "saved" && (!this.selectedPublisher.saved || this.selectedPublisher.sent)) || (this.selectedState == "sent" && !this.selectedPublisher.sent)) {
+        if (this.selectedPublisherList.length > 0) {
+          var newPublisher = this.selectedPublisherList[0]
+          var publisherFound = false;
+          for (var i = 0; i < this.publisherList.length; i++) {
+            if ((!this.publisherList[i].saved && this.selectedState == "found") || (!this.publisherList[i].saved && !this.publisherList[i].sent && this.selectedState == "sent")) {
+              newPublisher = this.publisherList[i]
+              if (publisherFound == true) {
+                break;
+              }
             }
-          }
-          if (this.publisherList[i].RegistrantName === savedSelectedPublisher.RegistrantName) {
-            publisherFound = true
-          }
+            if (this.publisherList[i].RegistrantName === savedSelectedPublisher.RegistrantName) {
+              publisherFound = true
+            }
 
+          }
+          this.selectPublisher(newPublisher)
         }
-        this.selectPublisher(newPublisher)
-      }
-      else {
-        this.selectPublisher({ _id: "", books: [], RegistrantName: "" })
+        else {
+          this.selectPublisher({ _id: "", books: [], RegistrantName: "" })
+        }
       }
     }
-
 
 
   }
@@ -842,6 +866,17 @@ export class ProductListComponent implements OnInit {
           return true
         }
       })
+
+      var foundISBN13 = {}
+      publisher.books = publisher.books.filter((book)=>{
+        if(foundISBN13[book.isbn13]){
+          return false
+        }
+        else{
+          foundISBN13[book.isbn13] = true
+          return true
+        }
+      })
       publisher.sales_rank = bestSalesRank
 
 
@@ -876,6 +911,22 @@ export class ProductListComponent implements OnInit {
       err => { }
     )
 
+  }
+
+  changeBookColor(book){
+    if(!book.color){
+      book.color = 1;
+    }
+    else{
+      book.color++
+    }
+    if(book.color>=this.publisherColors.length){
+      book.color = 0
+    }
+    this.api.update(this.updateurl, "bookcolor", {_id:this.selectedPublisher._id,color:book.color,isbn13:book.isbn13}).subscribe(
+      data => { },
+      err => { }
+    )
   }
 
 

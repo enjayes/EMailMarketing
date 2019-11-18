@@ -151,6 +151,19 @@ MongoClient.connect(url)
                                 console.log("doc.color == "+req.body.color)
 
                             }
+                            else if(action=="bookcolor"){
+                               
+                                if(doc.books){
+                                    doc.books.some((book)=>{
+                                        if(book.isbn13===req.body.isbn13){
+                                            book.color = req.body.color
+                                            console.log("book.color == "+req.body.color)
+                                        }
+                                    })
+                                }
+                                
+
+                            }
                         
                             console.log("insert: "+ req.params.id)
                             publishersCollection.replaceOne({ "_id": req.params.id }, doc)

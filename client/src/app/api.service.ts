@@ -105,6 +105,12 @@ export class ApiService {
         catchError(this.handleError)
       );
     }
+    else if(action=="bookcolor"){
+      return this.http.post(url+"/"+action+"/"+dataObject._id,{color:dataObject.color,isbn13:dataObject.isbn13}, httpOptions).pipe(
+        map(this.extractData),
+        catchError(this.handleError)
+      );
+    }
     else{
   
       return this.http.get(url+"/"+action+"/"+dataObject._id, httpOptions).pipe(

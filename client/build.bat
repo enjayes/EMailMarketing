@@ -1,1 +1,1 @@
-ng build --watch
+ng build --watch --prod=true
